@@ -11,6 +11,7 @@ Destination: A cross-platform CLI (`mntwork`) that provisions isolated Nix and c
 - Target macOS on Apple Silicon first. Linux support remains a design constraint for Podman and Docker, but not an initial validation claim.
 - Keep the interactive shell separate from Sandbox Environment lifetime. A shell may detach while its environment continues running.
 - Default generated Workspace data and disposable storage under the user's cache directory, while allowing the data root to move to an explicit path such as an external drive.
+- Support host 1Password as a credential broker for in-sandbox Git/SSH signing and narrowly granted secrets without copying private key material into the Sandbox Environment.
 - Use `grill-with-docs` and `domain-modeling` when resolving every design ticket. Record accepted vocabulary in `CONTEXT.md` and create ADRs only for hard-to-reverse trade-offs.
 - Treat the supplied OMP shell commands as untested exploration inputs, not reference implementations.
 
