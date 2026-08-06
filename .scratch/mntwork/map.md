@@ -17,12 +17,11 @@ Destination: A cross-platform CLI (`mntwork`) that provisions isolated Nix and c
 
 ## Decisions so far
 
-<!-- Empty until a child ticket is resolved. -->
+- [Define the CLI surface and Workspace lifecycle](issues/01-define-cli-surface-and-workspace-lifecycle.md) — Explicit Workspace initialization and resource-first `workspace`/`sandbox` commands separate durable composition from safe, scriptable Sandbox lifecycle.
 
 ## Fog
 
 - Implementation language and distribution mechanism cannot be chosen until the CLI and driver boundaries are clearer.
-- Direct-launch conveniences for specific coding-agent harnesses may emerge after the interactive shell lifecycle is defined.
 - Resource budgets, idle shutdown, and garbage-collection policy depend on observed runtime behavior.
 - The first integrated prototype cannot be scoped until runtime, configuration, routing, Nix, and worktree contracts settle.
 - Linux validation depth and release sequencing remain unclear until the macOS runtime proof is complete.
