@@ -18,6 +18,7 @@ Destination: A cross-platform CLI (`mntwork`) that provisions isolated Nix and c
 ## Decisions so far
 
 - [Define the CLI surface and Workspace lifecycle](issues/01-define-cli-surface-and-workspace-lifecycle.md) — Explicit Workspace initialization and resource-first `workspace`/`sandbox` commands separate durable composition from safe, scriptable Sandbox lifecycle.
+- [Define the Runtime Driver interface](issues/02-define-runtime-driver-interface.md) — Capability-gated preparation feeds strict lifecycle primitives, exact mount grants, sandbox-scoped workload engines, explicit host channels, and verifiable reconciliation and cleanup.
 
 ## Fog
 
