@@ -112,6 +112,22 @@ _Avoid_: Route, proxy
 A driver-neutral request to associate a named service route with a Port Publication for later realization by a route manager.
 _Avoid_: Port Publication, Caddy config
 
+**Base Image**:
+An immutable, platform-specific foundation from which a Sandbox Generation is created, identified by its exact published contents.
+_Avoid_: Project environment, image tag
+
+**Workspace Nix Store**:
+The persistent, private collection of Nix artifacts owned by one Workspace across its Sandbox Generations.
+_Avoid_: Host Nix store, Shared Artifact Cache
+
+**Shared Artifact Cache**:
+An optional, independently prunable source of trusted immutable artifacts that multiple Workspaces may consume without sharing writable stores.
+_Avoid_: Workspace Nix Store, shared store
+
+**Environment Authorization**:
+One Workspace's approval to evaluate an exact version of environment-loading code at an exact Worktree Context path.
+_Avoid_: Repository trust, permanent allow
+
 **Repository Manifest**:
 Optional versioned defaults contributed by one repository to any Workspace containing its Worktree Context.
 _Avoid_: Workspace config, runtime state
