@@ -1,0 +1,3 @@
+# Use location identities with continuity witnesses
+
+Repository and Worktree Identities are versioned hashes of canonical host-local locations, while separately stored Continuity Witnesses compare the strongest available filesystem identity and Git registration facts during reinspection. This keeps the Worktree Inspector read-only and makes aliases, moves, and ordinary replacement detectable without writing enrollment markers into repositories, while accepting that Git exposes no immutable repository UUID and therefore same-path replacement detection cannot be guaranteed when all available witness evidence is reused.

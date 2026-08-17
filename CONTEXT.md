@@ -20,13 +20,49 @@ _Avoid_: Workspace ID, directory name
 The user-scoped registry through which mntwork locates and disambiguates known Workspaces.
 _Avoid_: System registry, Workspace Definition
 
+**Host Scope ID**:
+A non-secret random namespace owned by one Workspace Index that prevents host-local identities from appearing portable across unrelated installations.
+_Avoid_: Hostname, machine credential, Workspace ID
+
 **Workspace Root**:
-A user-chosen directory that anchors discovery of one Workspace and may contain some or all of its Worktree Contexts.
+A user-chosen directory that anchors discovery of one Workspace and may equal or contain Worktree Contexts while remaining path-disjoint from their registered Common Git Directories.
 _Avoid_: Repository root, data root
 
 **Worktree Context**:
 A Git worktree, together with its linked common repository, participating in a Workspace.
 _Avoid_: Repository, checkout, project
+
+**Common Git Directory**:
+The repository-wide Git metadata and object store shared by a repository's main and linked worktrees.
+_Avoid_: Worktree Git directory, repository root, `.git` file
+
+**Repository Identity**:
+A host-local identity for one linked common Git repository, stable across equivalent path spellings while that repository remains at its canonical location.
+_Avoid_: Remote URL, repository name, clone identity
+
+**Repository Lease**:
+A Workspace's atomic claim on one live repository-authority equivalence set that prevents unrelated running Sandbox Environments from silently sharing writable repository-wide authority.
+_Avoid_: Git lock, Workspace membership, filesystem lock
+
+**Worktree Identity**:
+A host-local identity for one Git worktree within a Repository Identity, stable across equivalent path spellings while that worktree remains at its canonical location.
+_Avoid_: Branch name, worktree path, Worktree Context
+
+**Continuity Witness**:
+Reinspection evidence that the repository and worktree currently observed at a stable location remain consistent with their previously recorded filesystem and Git registration facts.
+_Avoid_: Repository Identity, ownership marker, guaranteed repository UUID
+
+**Live Repository Object Key**:
+Temporary, handle-derived evidence used within one Host Scope to decide whether distinct Repository Identities currently expose the same writable repository authority.
+_Avoid_: Repository Identity, Continuity Witness, permanent filesystem ID
+
+**Live Worktree Object Key**:
+Temporary, handle-derived evidence that combines a worktree root, its per-worktree Git directory, registration backlink, and live repository object to decide whether two paths currently expose the same worktree instance.
+_Avoid_: Worktree Identity, branch name, path hash
+
+**Worktree Inspector**:
+The read-only boundary that resolves explicit directory inputs into validated Worktree Contexts and their identities.
+_Avoid_: Repository scanner, Workspace discovery
 
 **Sandbox Environment**:
 The running isolated environment provisioned for one Workspace.
@@ -91,6 +127,10 @@ _Avoid_: Sandbox session, Sandbox Environment
 **Mount Grant**:
 An explicit allowance for a Sandbox Environment to access one host path at a declared sandbox path and access mode.
 _Avoid_: Volume, shared folder
+
+**Logical Mount Grant Set**:
+The complete purpose-preserving set of Mount Grants required by a Workspace before any Runtime Driver chooses a physical mount realization.
+_Avoid_: Physical mount plan, volume list
 
 **Workload Engine**:
 A sandbox-scoped Docker or Podman service used by projects inside a Sandbox Environment, independently of the Runtime Driver's own provider.

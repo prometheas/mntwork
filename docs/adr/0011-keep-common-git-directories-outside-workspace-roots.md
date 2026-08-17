@@ -1,0 +1,3 @@
+# Keep common Git directories outside Workspace Roots
+
+Every Common Git Directory resolved for a registered Worktree Context must be path-disjoint from its Workspace Root: neither canonical path may contain the other. A Worktree Context may equal or descend from the Root, or remain fully external, but may not contain the Root. This protects registered repositories' shared history and metadata when a Root is removed manually or by mntwork, while making no promise about unregistered nested repositories or uncommitted worktree content; conventional main worktrees remain valid only as external members, trading `workspace init .` convenience in ordinary clones for a clear deletion boundary aligned with mntwork's linked-worktree model.

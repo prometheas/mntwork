@@ -20,6 +20,7 @@ Destination: A cross-platform CLI (`mntwork`) that provisions isolated Nix and c
 - [Define the CLI surface and Workspace lifecycle](issues/01-define-cli-surface-and-workspace-lifecycle.md) — Explicit Workspace initialization and resource-first `workspace`/`sandbox` commands separate durable composition from safe, scriptable Sandbox lifecycle.
 - [Define the Runtime Driver interface](issues/02-define-runtime-driver-interface.md) — Capability-gated preparation feeds strict lifecycle primitives, exact mount grants, sandbox-scoped workload engines, explicit host channels, and verifiable reconciliation and cleanup.
 - [Design the Nix image and artifact reuse model](issues/04-design-nix-image-and-artifact-reuse.md) — Digest-pinned base images, persistent private Workspace stores, exact environment authorization, and an optional read-only signed cache separate trust from reuse.
+- [Design the Worktree Inspector](issues/05-design-worktree-inspector.md) — Explicit Git-plumbing inspection produces host-scoped location identities, continuity and live-equivalence evidence, atomic repository leases, and an exact Logical Mount Grant Set without repository scanning or mutation.
 
 ## Fog
 
