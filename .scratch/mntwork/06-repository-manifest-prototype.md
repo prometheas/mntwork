@@ -205,6 +205,87 @@ only path. Proposed: when stdin is not a TTY, never prompt; fail immediately
 with a distinct exit code and a machine-readable reason naming the exact flag
 that would authorize it. Agents and CI get a deterministic failure, not a hang.
 
+### 2c. Capability requests are ceiling-gated too — decided
+
+`capabilities.required` is the one manifest field that can *increase* privilege.
+Everything else either bounds resources or names things; this one can oblige a
+Workspace to run an in-sandbox Docker daemon because a cloned repository asked.
+Under `union-strict` alone that request would be honoured silently.
+
+Same treatment as resources: a user-global allowlist bounds what a manifest may
+request; anything outside it stops preparation and needs explicit authorization.
+
+```toml
+# user-global config
+[limits]
+memory_max = "16Gi"
+cpus_max = 8
+manifest_capabilities = ["nix-store", "port-publication"]   # workload-engine NOT listed
+```
+
+```
+$ mntwork sandbox start
+error: manifest requests capability outside user allowlist
+  workload-engine  required by acme/api  (~/work/acme-checkout/api/.mntwork.toml)
+authorize once with --accept-capability-request, or add it to
+[limits].manifest_capabilities
+```
+
+Note the ordering this implies: allowlist admission is checked **before**
+`union-strict` availability. A capability the user never permitted must be
+refused as unauthorized, not reported as an unsupported-host problem — the two
+failures have different remedies and must not be conflated in output.
+
+### 2d. The emerging pattern — propose as vocabulary
+
+Resources and capabilities landed on the same shape, and it is likely to recur
+for any future manifest field:
+
+> A repository **requests**; a user-global policy **bounds** the request; a
+> purpose-named flag **authorizes** one crossing; a non-TTY invocation **fails
+> deterministically** rather than prompting.
+
+Proposed term for `CONTEXT.md` on resolution — **Manifest Request Ceiling**: the
+user-global bound on what a Repository Manifest may oblige a Workspace to
+provide, distinct from the Sandbox Requirements actually sent to a Runtime
+Driver. _Avoid_: Sandbox Requirements, Capability Report, resource limit.
+
+Naming it matters because the alternative is re-litigating this per field, and
+because "ceiling" and "requirement" are already distinct concepts in ticket 02.
+
+### 2e. Manifest drift — decided: block only on increase
+
+A `git pull` can change a member's `.mntwork.toml` after `workspace init`.
+Re-authorization is required when the new manifest **asks for more**; any other
+drift re-resolves with a note.
+
+This deliberately departs from ADR 0010's strict-equality rule for `.envrc`.
+That rule is all-or-nothing because `.envrc` is executable code, where any diff
+can do anything and a delta is meaningless. A manifest is declarative data with
+a bounded schema, so "more" is computable. The two rules differ because the two
+artifacts differ, and the resolution should say so explicitly rather than look
+like an inconsistency.
+
+**Increase** is defined per merge rule — the same table that drives conflict
+resolution, reused as a partial order:
+
+| Rule | Counts as an increase when |
+| --- | --- |
+| `floor` | new value is greater |
+| `union` / `union-strict` | a member not previously present is added |
+| `unique` | a name not previously claimed is claimed |
+| `per-member` | never an increase; scoped to its own Worktree Context |
+
+A **decrease still emits a note** — a member quietly dropping a capability that
+another member depends on must not be invisible, even though it needs no
+approval.
+
+#### Schema consequence
+
+`manifest_hash` alone is insufficient: it detects *that* a manifest changed, not
+whether the change asks for more. The Definition must also record the request
+set that was authorized, per member.
+
 ---
 
 ## 3. Workspace Definition — `$WORKSPACE_ROOT/.mntwork/workspace.toml`
@@ -224,18 +305,28 @@ root = "~/work/acme-checkout"
 runtime = "auto"                    # portable; ADR 0004 layer 2
 
 [[members]]
-name = "api"
-path = "~/work/acme-checkout/api"
-relation = "within-root"
-manifest = ".mntwork.toml"
-manifest_hash = "sha256:1a2b…"      # renders manifest drift detectable
+name = "api"                        # NO path — location lives in the Index (see 4)
+manifest = ".mntwork.toml"          # relative to whatever path the Index binds
+manifest_hash = "sha256:1a2b…"      # detects THAT the manifest changed
+
+  # ...and the authorized request set detects whether it now asks for MORE.
+  # Compared field-by-field on start using the merge-rule partial order (2e).
+  [members.authorized_request]
+  memory_min = "4Gi"
+  cpus_min = 2
+  capabilities_required = ["workload-engine"]
+  routes = ["api"]
 
 [[members]]
 name = "checkout"
-path = "~/src/acme-web-worktrees/checkout"
-relation = "external"
 manifest = ".mntwork.toml"
 manifest_hash = "sha256:9f8e…"
+
+  [members.authorized_request]
+  memory_min = "8Gi"
+  cpus_min = 2
+  capabilities_required = []
+  routes = ["web", "storybook"]
 
 [resolved.sandbox]
 memory_min = "8Gi"
@@ -281,11 +372,39 @@ published_ports = [{ name = "api", host_port = 49812 }]
 ```
 
 **Workspace Index** (user-scoped registry) — proposed
-`$XDG_CONFIG_HOME/mntwork/index.toml`: slug → id → root path, plus Host Scope ID.
-Slug uniqueness (ADR 0002) is enforced here, and nowhere else.
+`$XDG_CONFIG_HOME/mntwork/index.toml`. Slug uniqueness (ADR 0002) is enforced
+here, and nowhere else. It also owns **every host path**, including the binding
+from each Definition member name to a local Worktree Context:
 
-Boundary rule proposed: **Definition = intent, State = allocation, Index = location.**
-If removing the Sandbox invalidates a value, it belongs in State.
+```toml
+host_scope_id = "hs_4c1d…"
+
+[[workspaces]]
+id = "wsp_01JBQ7M2X9K4"
+slug = "acme-checkout"
+root = "~/work/acme-checkout"
+
+  [workspaces.bindings]              # member name -> host path
+  api = "~/work/acme-checkout/api"
+  checkout = "~/src/acme-web-worktrees/checkout"
+```
+
+Boundary rule: **Definition = intent, State = allocation, Index = location.**
+If removing the Sandbox invalidates a value, it belongs in State. If it names a
+place on *this* host, it belongs in the Index.
+
+Consequence — the Definition becomes genuinely portable and committable, which
+is what ADR 0004's "portable with `runtime = \"auto\"`" was reaching for. A
+Definition committed by one developer and cloned by another carries intent but
+no paths, so a **bind step** is required before first start:
+
+```
+$ mntwork workspace bind --member api=./api --member checkout=~/src/acme-web/checkout
+```
+
+An unbound member is a hard failure at preparation, never an implicit guess —
+guessing a path would reintroduce exactly the repository-scanning that ticket 05
+ruled out.
 
 ---
 

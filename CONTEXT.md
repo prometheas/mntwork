@@ -179,3 +179,15 @@ _Avoid_: Workspace manifest, runtime state
 **Workspace State**:
 Mutable runtime-managed facts about a Workspace, including resource identities and allocations.
 _Avoid_: Workspace definition, user config
+
+**Manifest Request Ceiling**:
+The user-global bound on what a Repository Manifest may oblige a Workspace to provide, crossed only by explicit purpose-named authorization.
+_Avoid_: Sandbox Requirements, Capability Report, resource limit
+
+**Authorized Request Set**:
+The per-member resource and capability requests a Workspace has already approved, recorded so later manifest drift can be judged as an increase or not.
+_Avoid_: Sandbox Requirements, manifest hash, Environment Authorization
+
+**Member Binding**:
+The Workspace Index's mapping from a Workspace Definition's member name to a Worktree Context path on this host.
+_Avoid_: Worktree Identity, Workspace Root, membership

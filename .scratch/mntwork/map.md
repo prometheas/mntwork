@@ -21,10 +21,11 @@ Destination: A cross-platform CLI (`mntwork`) that provisions isolated Nix and c
 - [Define the Runtime Driver interface](issues/02-define-runtime-driver-interface.md) — Capability-gated preparation feeds strict lifecycle primitives, exact mount grants, sandbox-scoped workload engines, explicit host channels, and verifiable reconciliation and cleanup.
 - [Design the Nix image and artifact reuse model](issues/04-design-nix-image-and-artifact-reuse.md) — Digest-pinned base images, persistent private Workspace stores, exact environment authorization, and an optional read-only signed cache separate trust from reuse.
 - [Design the Worktree Inspector](issues/05-design-worktree-inspector.md) — Explicit Git-plumbing inspection produces host-scoped location identities, continuity and live-equivalence evidence, atomic repository leases, and an exact Logical Mount Grant Set without repository scanning or mutation.
+- [Define Repository Manifest and Workspace Definition contracts](issues/06-define-repository-manifest-and-workspace-definition.md) — Manifests state project needs only, merge by declared per-field semantics under a user-global Manifest Request Ceiling, and drift re-authorizes only on increase; Definition holds portable intent while the Index holds every host path.
 
 ## Fog
 
-- Implementation language and distribution mechanism cannot be chosen until the CLI and driver boundaries are clearer.
 - Resource budgets, idle shutdown, and garbage-collection policy depend on observed runtime behavior.
-- The first integrated prototype cannot be scoped until runtime, configuration, routing, Nix, and worktree contracts settle.
+- Concrete ceiling defaults and the initial manifest-requestable capability allowlist depend on the macOS runtime proof.
+- The first integrated prototype cannot be scoped until routing and the macOS runtime proof settle; the CLI, driver, Nix, worktree, and configuration contracts are now fixed.
 - Linux validation depth and release sequencing remain unclear until the macOS runtime proof is complete.

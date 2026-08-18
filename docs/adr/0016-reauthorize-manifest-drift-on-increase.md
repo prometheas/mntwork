@@ -1,0 +1,5 @@
+# Re-authorize manifest drift only on increased requests
+
+A member's `.mntwork.toml` may change beneath a Workspace through ordinary Git operations. Preparation blocks for renewed authorization only when the new manifest asks for more—a higher floor, an added capability, a newly claimed unique name—reusing the merge-rule table as a partial order; other drift re-resolves with a note, and a decrease still emits a note so one member quietly dropping a capability another depends on remains visible.
+
+This deliberately departs from ADR 0010, which requires renewed approval for any `.envrc` change. That rule is all-or-nothing because `.envrc` is executable code where any diff can do anything, whereas a manifest is declarative data with a bounded schema in which "more" is computable; treating them identically would trade real re-approval fatigue for no additional safety. Detecting increase requires the Workspace Definition to record each member's authorized request set rather than only a content hash.
